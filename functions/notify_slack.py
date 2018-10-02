@@ -43,8 +43,8 @@ def ses_bounce_notification(message, region):
         "color": color,
         "title": "Mail from {}".format(message['mail']['source']),
         "fields": [
-            {"title":"Date", "value": message['mail']['timestamp'], "short": true},
-            {"title":"Source IP", "value": message['mail']['sourceIp'], "short": true}
+            {"title":"Date", "value": message['mail']['timestamp'], "short": True},
+            {"title":"Source IP", "value": message['mail']['sourceIp'], "short": True}
         ]
     }]
 
