@@ -59,6 +59,18 @@ def ses_bounce_notification(message, region):
         })
     return bounces
 
+def ses_complaint_notification(message, region):
+    bounces = [{
+        "color": "danger",
+        "title": "Mail from {} classified as {}".format(message['mail']['source'], message['complaint']['complaintFeedbackType']),
+        "fields": [
+            {"title":"Date", "value": message['mail']['timestamp'], "short": True},
+            {"title":"Source IP", "value": message['mail']['sourceIp'], "short": True},
+            {"title":"Recipients", "value": message['mail']['destination'].join(', '), "short": False}
+        ]
+    }]
+    return bounces
+
 def default_notification(message):
     return {
             "fallback": "A new message",
@@ -89,6 +101,9 @@ def notify_slack(message, region):
     elif "notificationType" in message and message["notificationType"] == "Bounce":
         payload['text'] = "AWS SES Bounce notification - " + message["bounce"]["bounceType"] + " - " + message["bounce"]["bounceSubType"]
         payload['attachments'] + ses_bounce_notification(message, region)
+    elif "notificationType" in message and message["notificationType"] == "Complaint":
+        payload['text'] = "AWS SES Complaint notification"
+        payload['attachments'] + ses_complaint_notification(message, region)
     else:
         payload['text'] = "AWS notification"
         payload['attachments'].append(default_notification(message))
