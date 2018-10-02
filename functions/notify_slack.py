@@ -100,10 +100,10 @@ def notify_slack(message, region):
         payload['attachments'].append(notification)
     elif "notificationType" in message and message["notificationType"] == "Bounce":
         payload['text'] = "AWS SES Bounce notification - " + message["bounce"]["bounceType"] + " - " + message["bounce"]["bounceSubType"]
-        payload['attachments'] + ses_bounce_notification(message, region)
+        payload['attachments'] = ses_bounce_notification(message, region)
     elif "notificationType" in message and message["notificationType"] == "Complaint":
         payload['text'] = "AWS SES Complaint notification"
-        payload['attachments'] + ses_complaint_notification(message, region)
+        payload['attachments'] = ses_complaint_notification(message, region)
     else:
         payload['text'] = "AWS notification"
         payload['attachments'].append(default_notification(message))
