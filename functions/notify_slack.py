@@ -35,6 +35,29 @@ def cloudwatch_notification(message, region):
             ]
         }
 
+def ses_bounce_notification(message, region):
+    states = {'Transient': 'warning', 'Undetermined': 'warning', 'Permanent': 'danger'}
+    color = states[message['bounce']['bounceType']]
+
+    bounces = [{
+        "color": color,
+        "title": "Mail from {}".format(message['mail']['source']),
+        "fields": [
+            {"title":"Date", "value": message['mail']['timestamp'], "short": true},
+            {"title":"Source IP", "value": message['mail']['sourceIp'], "short": true}
+        ]
+    }]
+
+    for recv in message["bounce"]["bouncedRecipients"]:
+        bounces.append({
+            "color": color,
+            "title": "Recipient Address: {}".format(recv["emailAddress"]),
+            "fields": [
+                { "title": "Status Code", "value": recv["status"], "short": True },
+                { "title": "Diagnostic", "value": recv["diagnosticCode"], "short": True },
+            ],
+        })
+    return bounces
 
 def default_notification(message):
     return {
@@ -63,6 +86,9 @@ def notify_slack(message, region):
         notification = cloudwatch_notification(message, region)
         payload['text'] = "AWS CloudWatch notification - " + message["AlarmName"]
         payload['attachments'].append(notification)
+    elif "notificationType" in message and message["notificationType"] == "Bounce":
+        payload['text'] = "AWS SES Bounce notification - " + message["bounce"]["bounceType"] + " - " + message["bounce"]["bounceSubType"]
+        payload['attachments'] + ses_bounce_notification(message, region)
     else:
         payload['text'] = "AWS notification"
         payload['attachments'].append(default_notification(message))
